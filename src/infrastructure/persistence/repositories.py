@@ -1,6 +1,6 @@
 from typing import List
 
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.application.ports.repositories import AdRepository
@@ -40,7 +40,10 @@ class SQLAlchemyAdRepository(AdRepository):
         self,
         ad_id: int,
     ) -> Ad | None:
-        raise NotImplementedError
+        query = select(AdModel).where(AdModel.id == ad_id)
+        model = await self._session.execute(query)
+        ad = model.scalar_one_or_none()
+        return None if ad is None else _to_entity(ad)
 
     async def list(
         self,
@@ -71,7 +74,20 @@ class SQLAlchemyAdRepository(AdRepository):
         self,
         ad: Ad,
     ) -> None:
-        raise NotImplementedError
+        query = (
+            update(AdModel)
+            .where(AdModel.id == ad.id)
+            .values(
+                title=ad.title,
+                description=ad.description,
+                price=ad.price,
+                category=ad.category,
+                city=ad.city,
+                status=ad.status,
+                updated_at=ad.updated_at,
+            )
+        )
+        await self._session.execute(query)
 
 
 def _to_entity(model: AdModel) -> Ad:
