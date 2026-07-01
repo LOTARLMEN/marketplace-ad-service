@@ -7,7 +7,7 @@ ENV PYTHONUNBUFFERED=1 \
     UV_NO_DEV=1 \
     UV_FROZEN=1 \
     PYTHONPATH=/app \
-    PATH="/root/.local/bin:$PATH"
+    PATH="/app/.venv/bin:/root/.local/bin:$PATH"
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends curl ca-certificates \
@@ -25,4 +25,4 @@ RUN uv sync --frozen --no-dev
 
 EXPOSE 8002
 
-CMD ["uv", "run", "python", "-m", "bin.api"]
+CMD ["python", "-m", "bin.api"]
