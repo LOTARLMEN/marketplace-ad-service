@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
     postgres_host: str
     postgres_database_name: str
@@ -14,7 +14,7 @@ class Settings(BaseSettings):
     jwt_algorithm: str = "HS256"
     kafka_bootstrap_servers: str = "localhost:9092"
     kafka_brokers: str = "kafka.kafka.svc.cl"
-    kafka_topic_ads: str = "ads"
+    kafka_topic_marketplace_ads: str = "ads"
     auth_service_url: str = "http://localhost:8000"
 
     @property
