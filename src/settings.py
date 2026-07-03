@@ -19,6 +19,13 @@ class Settings(BaseSettings):
     kafka_topic_marketplace_ads: str = "ads"
     auth_service_url: str = "http://localhost:8000"
 
+    def __init__(self, **values):
+        super().__init__(**values)
+        import os
+
+        if "KAFKA_BROKERS" in os.environ:
+            self.kafka_bootstrap_servers = os.environ["KAFKA_BROKERS"]
+
     @property
     def database_url(self) -> str:
         return f"postgresql+asyncpg://{self.postgres_username}:{self.postgres_password}@{self.postgres_host}:{self.postgres_port}/{self.postgres_database_name}"
