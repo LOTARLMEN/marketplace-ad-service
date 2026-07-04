@@ -39,12 +39,22 @@ class OutboxRelay:
                 return 0
 
             for message in messages:
-                await self._broker.send(
-                    {
-                        "event": message.event_type,
-                        "payload": message.payload,
-                    },
-                )
+                trace_id = message.payload.get("trace_id")
+                from src.infrastructure.logging import trace_id_var
+
+                token = None
+                if trace_id:
+                    token = trace_id_var.set(trace_id)
+                try:
+                    await self._broker.send(
+                        {
+                            "event": message.event_type,
+                            "payload": message.payload,
+                        },
+                    )
+                finally:
+                    if token is not None:
+                        trace_id_var.reset(token)
 
             await uow.outbox.mark_published([m.id for m in messages])
             await uow.commit()

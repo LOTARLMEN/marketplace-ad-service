@@ -12,6 +12,11 @@ class SQLAlchemyOutboxRepository(OutboxRepository):
         self._session = session
 
     async def add(self, event_type: str, payload: dict[str, Any]) -> None:
+        from src.infrastructure.logging import get_trace_id
+
+        trace_id = get_trace_id()
+        if trace_id:
+            payload = {**payload, "trace_id": trace_id}
         self._session.add(OutboxModel(event_type=event_type, payload=payload))
 
     async def fetch_unpublished(self, limit: int) -> list[OutboxMessage]:

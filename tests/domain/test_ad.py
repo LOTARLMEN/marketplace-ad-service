@@ -86,3 +86,18 @@ def test_archive_already_archived_raises() -> None:
     ad = _make_ad(status=AdStatus.ARCHIVED)
     with pytest.raises(AdAlreadyArchivedError):
         ad.archive()
+
+
+def test_increment_views_bumps_views() -> None:
+    ad = _make_ad()
+    assert ad.views == 0
+    ad.increment_views()
+    assert ad.views == 1
+    ad.increment_views()
+    assert ad.views == 2
+
+
+def test_increment_views_on_archived_raises() -> None:
+    ad = _make_ad(status=AdStatus.ARCHIVED)
+    with pytest.raises(AdAlreadyArchivedError):
+        ad.increment_views()

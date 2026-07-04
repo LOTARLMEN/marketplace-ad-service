@@ -199,3 +199,42 @@ async def test_invalid_token_rejected(client: AsyncClient) -> None:
         },
     )
     assert resp.status_code == 401
+
+
+async def test_increment_views_success(
+    client: AsyncClient, auth_headers: dict[str, str]
+) -> None:
+    created = await _create_ad(client, auth_headers)
+
+    # Убедимся, что просмотров изначально 0
+    resp = await client.get(f"/ads/{created['id']}")
+    assert resp.status_code == 200
+    assert resp.json()["views"] == 0
+
+    # Выполним POST на инкремент просмотров
+    view_resp = await client.post(f"/ads/{created['id']}/view")
+    assert view_resp.status_code == 204
+
+    # Убедимся, что просмотров стало 1
+    resp = await client.get(f"/ads/{created['id']}")
+    assert resp.status_code == 200
+    assert resp.json()["views"] == 1
+
+
+async def test_increment_views_not_found(client: AsyncClient) -> None:
+    resp = await client.post("/ads/999/view")
+    assert resp.status_code == 404
+
+
+async def test_trace_id_propagation_provided(client: AsyncClient) -> None:
+    resp = await client.get("/ads", headers={"X-Trace-Id": "test-trace-123"})
+    assert resp.headers.get("x-trace-id") == "test-trace-123"
+
+
+async def test_trace_id_propagation_generated(client: AsyncClient) -> None:
+    resp = await client.get("/ads")
+    assert "x-trace-id" in resp.headers
+    import uuid
+    val = resp.headers.get("x-trace-id")
+    assert val is not None
+    uuid.UUID(val)
